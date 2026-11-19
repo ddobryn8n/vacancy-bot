@@ -59,6 +59,31 @@ def load_env(path=ENV_FILE):
         os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
+# --- Настройки сервера-ленты (server.py, feed.py). Задаются переменными окружения, в Dokploy — вкладка Environment ---
+load_env()
+
+
+def _flag(name, default="0"):
+    return os.environ.get(name, default).strip().lower() in ("1", "true", "yes", "да")
+
+
+def _list(name):
+    return [x.strip().lstrip("@") for x in os.environ.get(name, "").split(",") if x.strip()]
+
+
+# Где хранить память об отправленном. На сервере это том /data, чтобы переживал пересборку контейнера.
+SENT_FILE = Path(os.environ.get("SENT_FILE") or SENT_FILE)
+# Дополнительные каналы без правки кода: EXTRA_CHANNELS=chan1,chan2 (юзернеймы без @)
+CHANNELS = CHANNELS + [c for c in _list("EXTRA_CHANNELS") if c not in CHANNELS]
+TEXT_CHANNELS = TEXT_CHANNELS | set(_list("EXTRA_TEXT_CHANNELS"))
+# Лента: сколько вакансий слать за один запуск, пауза между сообщениями (сек), только ли с оплатой
+FEED_MAX_PER_RUN = int(os.environ.get("FEED_MAX_PER_RUN") or 3)
+FEED_PAUSE_SECONDS = float(os.environ.get("FEED_PAUSE_SECONDS") or 3)
+REQUIRE_PAY = _flag("REQUIRE_PAY", "0")
+# Кому писать о поломке (необязательно): id вашего личного чата с ботом
+ADMIN_CHAT_ID = os.environ.get("ADMIN_CHAT_ID", "").strip()
+RUN_TOKEN = os.environ.get("RUN_TOKEN", "").strip()
+
 CHAT_ID_RE = re.compile(r"^(-?\d+|@\w{4,})$")
 
 

@@ -273,7 +273,8 @@ def _contact_line(item):
 
 def format_vacancy(n, item, remote_words):
     title = escape(_abbr(_who(item)))
-    lines = [f'<b>{n}. <a href="{item.url}">{title}</a></b>']
+    number = f"{n}. " if n else ""   # в ленте (одна вакансия в сообщении) номер не нужен
+    lines = [f'<b>{number}<a href="{item.url}">{title}</a></b>']
     summary = summary_of(item)
     if summary:
         lines.append(escape(_abbr(summary[0].upper() + summary[1:])))

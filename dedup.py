@@ -8,6 +8,7 @@
   Это для Текстодрома: контакт там скрыт за кнопкой, а текст переписан своими словами.
 """
 import json
+import os
 import re
 from datetime import datetime, timedelta, timezone
 
@@ -143,4 +144,7 @@ class SentStore:
         self._keys.add(item.key)
 
     def save(self):
-        self.path.write_text(json.dumps(self.entries, ensure_ascii=False, indent=1), encoding="utf-8")
+        # Сначала во временный файл, потом подмена: оборванная запись не испортит память об отправленном.
+        tmp = self.path.with_name(self.path.name + ".tmp")
+        tmp.write_text(json.dumps(self.entries, ensure_ascii=False, indent=1), encoding="utf-8")
+        os.replace(tmp, self.path)

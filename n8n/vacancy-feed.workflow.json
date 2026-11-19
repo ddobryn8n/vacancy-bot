@@ -1,0 +1,78 @@
+{
+  "name": "Вакансии — лента в группу марафона",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Лента вакансий\nКаждые 15 минут с 8:00 до 22:45 МСК дёргает сервис вакансий (Dokploy). Сервис сам собирает каналы, отбирает вакансии и шлёт в группу до 3 штук за раз.\n\n**Перед включением:**\n1. В узле «Запустить ленту» замените `ВАШ-ДОМЕН` на адрес сервиса.\n2. Замените `ВСТАВЬТЕ_RUN_TOKEN` на значение RUN_TOKEN из Dokploy.\n3. Нажмите «Execute workflow» один раз вручную, потом включите Active.\n\nПроверка без отправки: добавьте к адресу `?dry=1`.\nЕсли узел красный — смотрите Executions: текст ошибки пришлёт сам сервис.",
+        "height": 330,
+        "width": 420
+      },
+      "id": "5b0c6b7a-6c5d-4d52-9a1e-3f1a0a1c0001",
+      "name": "Заметка",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-120, -380]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 8-22 * * *"
+            }
+          ]
+        }
+      },
+      "id": "5b0c6b7a-6c5d-4d52-9a1e-3f1a0a1c0002",
+      "name": "Каждые 15 минут (8-22 МСК)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ВАШ-ДОМЕН/run",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer ВСТАВЬТЕ_RUN_TOKEN"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "5b0c6b7a-6c5d-4d52-9a1e-3f1a0a1c0003",
+      "name": "Запустить ленту",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [300, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 30000
+    }
+  ],
+  "connections": {
+    "Каждые 15 минут (8-22 МСК)": {
+      "main": [
+        [
+          {
+            "node": "Запустить ленту",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Moscow"
+  },
+  "active": false
+}
